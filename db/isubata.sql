@@ -7,7 +7,7 @@ CREATE TABLE user (
   avatar_icon TEXT,
   created_at DATETIME NOT NULL
 ) Engine=InnoDB DEFAULT CHARSET=utf8mb4;
-CREATE INDEX user_name ON user(name)
+CREATE INDEX user_name ON user(name);
 
 CREATE TABLE image (
   id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
