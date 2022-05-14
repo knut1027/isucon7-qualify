@@ -569,7 +569,7 @@ func jsonifyMessages(chID int64, N, page int) ([]MessageWithUser, error) {
 			return nil, err
 		}
 		m.Date = m.CreatedAt.Format("2006/01/02 15:04:05")
-		messages = append(messages, m)
+		messages = append([]MessageWithUser{m}, messages...)
 	}
 	return messages, nil
 }
