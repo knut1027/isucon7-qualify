@@ -515,21 +515,9 @@ func getHistory(c echo.Context) error {
 		return ErrBadReqeust
 	}
 
-	messages := []Message{}
-	err = db.Select(&messages,
-		"SELECT * FROM message WHERE channel_id = ? ORDER BY id DESC LIMIT ? OFFSET ?",
-		chID, N, (page-1)*N)
+	mjson, err := jsonifyMessages(chID, N, int(page))
 	if err != nil {
 		return err
-	}
-
-	mjson := make([]map[string]interface{}, 0)
-	for i := len(messages) - 1; i >= 0; i-- {
-		r, err := jsonifyMessage(messages[i])
-		if err != nil {
-			return err
-		}
-		mjson = append(mjson, r)
 	}
 
 	channels := []ChannelInfo{}
@@ -546,6 +534,45 @@ func getHistory(c echo.Context) error {
 		"Page":      page,
 		"User":      user,
 	})
+}
+
+type MessageWithUser struct {
+	ID        int64
+	ChannelID int64
+	User      User
+	Content   string
+	CreatedAt time.Time
+	Date      string
+}
+
+func jsonifyMessages(chID int64, N, page int) ([]MessageWithUser, error) {
+	rows, err := db.Query(`SELECT m.id, m.created_at, m.content, u.name, u.display_name, u.avatar_icon
+	FROM message AS m
+	JOIN user AS u ON m.user_id = u.id
+	WHERE m.channel_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`, chID, N, (page-1)*N)
+	if err != nil {
+		return nil, err
+	}
+
+	messages := make([]MessageWithUser, 0)
+	for rows.Next() {
+		m := MessageWithUser{}
+		err = rows.Scan(
+			&m.ID,
+			&m.CreatedAt,
+			&m.Content,
+			&m.User.Name,
+			&m.User.DisplayName,
+			&m.User.AvatarIcon,
+		)
+		if err != nil {
+			return nil, err
+		}
+		m.Date = m.CreatedAt.Format("2006/01/02 15:04:05")
+		messages = append(messages, m)
+	}
+	log.Printf("messages", messages)
+	return messages, nil
 }
 
 func getProfile(c echo.Context) error {
