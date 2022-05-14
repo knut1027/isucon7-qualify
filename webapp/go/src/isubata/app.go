@@ -515,7 +515,7 @@ func getHistory(c echo.Context) error {
 		return ErrBadReqeust
 	}
 
-	mjson, err := jsonifyMessages(chID, N, page)
+	mjson, err := jsonifyMessages(chID, N, int(page))
 	if err != nil {
 		return err
 	}
@@ -545,7 +545,7 @@ type MessageWithUser struct {
 	Date      string
 }
 
-func jsonifyMessages(chID int64, N int, page int64) ([]MessageWithUser, error) {
+func jsonifyMessages(chID int64, N, page int64) ([]MessageWithUser, error) {
 	rows, err := db.Query(`SELECT m.id, m.created_at, m.content, u.name, u.display_name, u.avatar_icon
 	FROM message AS m
 	JOIN user AS u ON m.user_id = u.id
