@@ -545,7 +545,7 @@ type MessageWithUser struct {
 	Date      string
 }
 
-func jsonifyMessages(chID int64, N, page int64) ([]MessageWithUser, error) {
+func jsonifyMessages(chID int64, N, page int) ([]MessageWithUser, error) {
 	rows, err := db.Query(`SELECT m.id, m.created_at, m.content, u.name, u.display_name, u.avatar_icon
 	FROM message AS m
 	JOIN user AS u ON m.user_id = u.id
